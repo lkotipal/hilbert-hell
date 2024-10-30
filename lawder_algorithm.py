@@ -80,7 +80,6 @@ leftShiftDict = {
 
 dY = list([i ^ j for i, j in X_2])
 TY = [(i[0], dYdict[j]) for i, j in zip(X_2, dY)]
-print(TY)
 
 #TY = [np.stack((i, i[[2, 0, 1]], i[[1, 2, 0]])) for i in dY]
 #
@@ -90,13 +89,14 @@ print(TY)
 #        t[j, j] = -1 if X_2[i][0][j] else 1
 #    TY[i] = np.dot(t, TY[i])
 
-X1 = [[-1 for i in range(8)]]
+
+X1 = [[-1 for _ in range(8)]]
 for i, X_i in enumerate(X_1):
     X1[0][i] = X_i
 
 state = 0
 states = {}
-tm = [[-1 for i in range(8)]]
+tm = [[-1 for _ in range(8)]]
 for i, T in enumerate(TY):
     for j, mat in states.items():
         if (T[1] == mat[1] and np.array_equal(T[0], mat[0])):
@@ -109,8 +109,8 @@ for i, T in enumerate(TY):
 
 u = 1
 while u <= state:
-    X1.append([-1 for i in range(8)])
-    tm.append([-1 for i in range(8)])
+    X1.append([-1 for _ in range(8)])
+    tm.append([-1 for _ in range(8)])
     X2u, dYu = states[u]
     for i in range(8):
         j = leftRotate(i ^ states[u][0], states[u][1])
@@ -128,14 +128,43 @@ while u <= state:
             tm[u][p] = state
     u = u + 1
 
-print('X1')
+X1_inv = []
+tm_inv = []
+for u, (X1u, tmu) in enumerate(zip(X1, tm)):
+    X1_inv.append([-1 for _ in range(8)])
+    tm_inv.append([-1 for _ in range(8)])
+    for idx, (x1, state) in enumerate(zip(X1u, tmu)):
+        X1_inv[u][x1] = idx
+        tm_inv[u][x1] = state
+
+contents = ''
+print('static unsigned const data3d [] = {')
 for i in X1:
     for j in i:
-        print(j, end=', ')
-    print()
+        contents += f'{j}, '
+    contents += '\n'
+print(f'{contents[:-3]}\n}};\n')
 
-print('\ntm')
+contents = ''
+print('static unsigned const state3d [] = {')
 for i in tm:
     for j in i:
-        print(j, end=', ')
-    print()
+        contents += f'{j}, '
+    contents += '\n'
+print(f'{contents[:-3]}\n}};\n')
+
+contents = ''
+print('static unsigned const idata3d [] = {')
+for i in X1_inv:
+    for j in i:
+        contents += f'{j}, '
+    contents += '\n'
+print(f'{contents[:-3]}\n}};\n')
+
+contents = ''
+print('static unsigned const istate3d [] = {')
+for i in tm_inv:
+    for j in i:
+        contents += f'{j}, '
+    contents += '\n'
+print(f'{contents[:-3]}\n}};\n')
