@@ -9,7 +9,13 @@ def leftRotate(n, d):
 def rightRotate(n, d):
     return (n >> d)|(n << (3 - d)) & 0b111
 
-''' "Butz", from Lawder
+def toVector(i):
+    return [i & 4, i & 2, i & 1]
+
+def toBinary(v):
+    return v[0] * 4 + v[1] * 2 + v[0]
+
+''' This table is just indexing 0 - 7
 Y = [
     0b000,
     0b001,
@@ -20,7 +26,9 @@ Y = [
     0b110,
     0b111
 ]
+'''
 
+''' "Butz", from Lawder
 X_1 = [
     0b000,
     0b001,
@@ -95,7 +103,7 @@ for i, X_i in enumerate(X_1):
     X1[0][i] = X_i
 
 state = 0
-states = {}
+states = {0: (0, 0)}
 tm = [[-1 for _ in range(8)]]
 for i, T in enumerate(TY):
     for j, mat in states.items():
