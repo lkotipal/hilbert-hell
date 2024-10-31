@@ -105,7 +105,7 @@ dYdict = {
 dY = list([i ^ j for i, j in X_2])
 
 handedness = np.array([False for _ in range(8)]) # 'Butz'
-handedness[[1, 4, 5]] = True # 'alfa' from Haverkort
+handedness[[0, 3, 4]] = True # 'alfa' from Haverkort
 
 TY = [np.stack((toVector(i), toVector(leftRotate(i, 1) if flip else rightRotate(i, 1)), toVector(leftRotate(i, 2) if flip else rightRotate(i, 2)))) for i, flip in zip(dY, handedness)]
 
