@@ -48,7 +48,7 @@ Y = [
 ]
 '''
 
-''' "Butz", from Lawder
+#''' # "Butz", from Haverkort
 X_1 = [
     0b000,
     0b001,
@@ -70,42 +70,37 @@ X_2 = [
     (0b110, 0b100),
     (0b101, 0b100)
 ]
-'''
-
-#''' "Butz", from Haverkort
-X_1 = [
-    0b000,
-    0b001,
-    0b011,
-    0b010,
-    0b110,
-    0b111,
-    0b101,
-    0b100
-]
-
-X_2 = [
-    (0b000, 0b001),
-    (0b000, 0b010),
-    (0b000, 0b010),
-    (0b011, 0b111),
-    (0b011, 0b111),
-    (0b110, 0b100),
-    (0b110, 0b100),
-    (0b101, 0b100)
-]
-#'''
-
-dYdict = {
-    4: 0, 
-    2: 1, 
-    1: 2
-}
-
-dY = list([i ^ j for i, j in X_2])
 
 handedness = np.array([False for _ in range(8)]) # 'Butz'
-handedness[[0, 3, 4]] = True # 'alfa' from Haverkort
+handedness[[0, 3, 4]] = True # 'alfa' from Haverkort (supposedly)
+#'''
+
+''' "Beta", from Haverkort
+X_1 = [
+    0b000,
+    0b001,
+    0b011,
+    0b010,
+    0b110,
+    0b111,
+    0b101,
+    0b100
+]
+
+X_2 = [
+    (0b101, 0b111),
+    (0b110, 0b111),
+    (0b101, 0b100),
+    (0b101, 0b100),
+    (0b000, 0b001),
+    (0b000, 0b001),
+    (0b011, 0b010),
+    (0b011, 0b111),
+]
+handedness = [False, True, True, False, False, True, True, True] # 'beta' from Haverkort
+'''
+
+dY = list([i ^ j for i, j in X_2])
 
 TY = [np.stack((toVector(i), toVector(leftRotate(i, 1) if flip else rightRotate(i, 1)), toVector(leftRotate(i, 2) if flip else rightRotate(i, 2)))) for i, flip in zip(dY, handedness)]
 
@@ -114,6 +109,11 @@ for i in range(8):
     for j in range(3):
         t[j, j] = -1 if X_2[i][0] & (4 >> j) else 1
     TY[i] = np.dot(TY[i], t)
+
+for i in TY:
+    print(i)
+    print()
+exit(0)
 
 X1 = [[-1 for _ in range(8)]]
 for i, X_i in enumerate(X_1):
