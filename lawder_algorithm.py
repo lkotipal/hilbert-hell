@@ -15,7 +15,7 @@ def toVector(i):
 def toBinary(v):
     return v[0] * 4 + v[1] * 2 + v[2]
 
-def leftMatmul(v, M):
+def leftMatmul(M, v):
     ret = np.array([0, 0, 0], int)
     for i, row in enumerate(M):
         for j, elem in enumerate(row):
@@ -25,7 +25,7 @@ def leftMatmul(v, M):
                 ret[j] = not toVector(v)[i]
     return toBinary(ret)
 
-def rightMatmul(v, M):
+def rightMatmul(M, v):
     ret = np.array([0, 0, 0], int)
     for i, row in enumerate(M):
         for j, elem in enumerate(row):
@@ -72,7 +72,9 @@ X_2 = [
 ]
 
 handedness = np.array([False for _ in range(8)]) # 'Butz'
-handedness[[0, 3, 4]] = True # 'alfa' from Haverkort (supposedly)
+reverse = np.array([False for _ in range(8)]) # 'Butz', TODO is Butz actually ambivalent on mirroring?
+handedness[[0, 3, 4]] = True # 'alfa' from Haverkort
+reverse[[2, 4, 6, 7]] = True # 'alfa
 #'''
 
 ''' "Beta", from Haverkort
@@ -97,12 +99,13 @@ X_2 = [
     (0b011, 0b010),
     (0b011, 0b111),
 ]
-handedness = [False, True, True, False, False, True, True, True] # 'beta' from Haverkort
+handedness = [False, True, True, False, False, True, True, True]
+mirror = [True, True, False, True, False, True, False, False]
 '''
 
 dY = list([i ^ j for i, j in X_2])
 
-TY = [np.stack((toVector(i), toVector(leftRotate(i, 1) if flip else rightRotate(i, 1)), toVector(leftRotate(i, 2) if flip else rightRotate(i, 2)))) for i, flip in zip(dY, handedness)]
+TY = [np.stack((toVector(i), toVector(leftRotate(i, 1) if left else rightRotate(i, 1)), toVector(leftRotate(i, 2) if left else rightRotate(i, 2)))) for i, left in zip(dY, handedness)]
 
 for i in range(8):
     t = np.zeros((3, 3), int)
@@ -110,10 +113,32 @@ for i in range(8):
         t[j, j] = -1 if X_2[i][0] & (4 >> j) else 1
     TY[i] = np.dot(TY[i], t)
 
-for i in TY:
-    print(i)
-    print()
-exit(0)
+TY = list(zip(TY, reverse))
+
+TY_reverse = [np.stack((toVector(i), toVector(leftRotate(i, 1) if left else rightRotate(i, 1)), toVector(leftRotate(i, 2) if left else rightRotate(i, 2)))) for i, left in zip(dY, handedness[::-1])]
+
+for i in range(8):
+    t = np.zeros((3, 3), int)
+    for j in range(3):
+        t[j, j] = -1 if X_2[i][0] & (4 >> j) else 1
+    TY_reverse[i] = np.dot(TY_reverse[i], t)
+
+TY_reverse = list(zip(TY_reverse, reverse[::-1]))
+
+reverse_state = 0
+reverse_states = {0: np.identity(3, int)}
+for i, T in enumerate(TY_reverse):
+    for j, mat in reverse_states.items():
+        if (np.array_equal(T[0], mat[0]) and T[1] == mat[1]):
+            break
+    else:
+        reverse_state = reverse_state + 1
+        reverse_states[reverse_state] = T
+
+#for i in TY:
+#    print(i)
+#    print()
+#exit(0)
 
 X1 = [[-1 for _ in range(8)]]
 for i, X_i in enumerate(X_1):
@@ -125,7 +150,7 @@ states = {0: np.identity(3, int)}
 tm = [[-1 for _ in range(8)]]
 for i, T in enumerate(TY):
     for j, mat in states.items():
-        if (np.array_equal(T, mat)):
+        if (np.array_equal(T[0], mat[0]) and T[1] == mat[1]):
             tm[0][i] = j
             break
     else:
@@ -137,20 +162,21 @@ u = 1
 while u <= state:
     X1.append([-1 for _ in range(8)])
     tm.append([-1 for _ in range(8)])
-    TMu = states[u]
+    TMu, reverse_u = states[u]
     for i in range(8):
-        j = rightMatmul(i, TMu)
+        j = rightMatmul(TMu, i)
         p = X1[0].index(j)
         X1[u][p] = i
-        TMq = states[tm[0][p]]
+        TMq, reverse_q = reverse_states[tm[0][p]] if reverse_u else states[tm[0][p]]
         TMw = np.dot(TMq, TMu)
+        reverse_w = reverse_u ^ reverse_q
         for idx, mat in states.items():
-            if (np.array_equal(TMw, mat)):
+            if (np.array_equal(TMw, mat[0]) and reverse_w == mat[1]):
                 tm[u][p] = idx
                 break
         else:
             state = state + 1
-            states[state] = TMw
+            states[state] = (TMw, reverse_w)
             tm[u][p] = state
     u = u + 1
 
