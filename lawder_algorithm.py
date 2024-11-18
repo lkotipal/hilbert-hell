@@ -48,7 +48,7 @@ Y = [
 ]
 '''
 
-#''' # "Butz", from Haverkort
+''' "Butz", from Haverkort
 X_1 = [
     0b000,
     0b001,
@@ -71,13 +71,17 @@ X_2 = [
     (0b101, 0b100)
 ]
 
-handedness = np.array([False for _ in range(8)]) # 'Butz'
-reverse = np.array([False for _ in range(8)]) # 'Butz', TODO is Butz actually ambivalent on mirroring?
-handedness[[0, 3, 4]] = True # 'alfa' from Haverkort
-reverse[[2, 4, 6, 7]] = True # 'alfa
-#'''
+# Butz
+handedness = np.array([False for _ in range(8)])
+reverse = np.array([False for _ in range(8)]) # TODO is Butz actually ambivalent on mirroring?
 
-''' "Beta", from Haverkort
+# alfa
+handedness[[0, 3, 4]] = True # 'alfa' from Haverkort
+X_2_reverse = X_2.copy()
+reverse[[2, 4, 6, 7]] = True
+'''
+
+#''' "Beta" , from Haverkort
 X_1 = [
     0b000,
     0b001,
@@ -100,11 +104,14 @@ X_2 = [
     (0b011, 0b111),
 ]
 handedness = [False, True, True, False, False, True, True, True]
-mirror = [True, True, False, True, False, True, False, False]
-'''
+reverse = [True, True, False, True, False, True, False, False]
+
+X_2_reverse = X_2.copy()
+X_2_reverse[0] = (0b011, 0b111)
+X_2_reverse[7] = (0b011, 0b001)
+#'''
 
 dY = list([i ^ j for i, j in X_2])
-
 TY = [np.stack((toVector(i), toVector(leftRotate(i, 1) if left else rightRotate(i, 1)), toVector(leftRotate(i, 2) if left else rightRotate(i, 2)))) for i, left in zip(dY, handedness)]
 
 for i in range(8):
@@ -115,7 +122,8 @@ for i in range(8):
 
 TY = list(zip(TY, reverse))
 
-TY_reverse = [np.stack((toVector(i), toVector(leftRotate(i, 1) if left else rightRotate(i, 1)), toVector(leftRotate(i, 2) if left else rightRotate(i, 2)))) for i, left in zip(dY, handedness[::-1])]
+dY_reverse = list([i ^ j for i, j in X_2_reverse])
+TY_reverse = [np.stack((toVector(i), toVector(leftRotate(i, 1) if left else rightRotate(i, 1)), toVector(leftRotate(i, 2) if left else rightRotate(i, 2)))) for i, left in zip(dY_reverse, handedness[::-1])]
 
 for i in range(8):
     t = np.zeros((3, 3), int)
@@ -134,11 +142,6 @@ for i, T in enumerate(TY_reverse):
     else:
         reverse_state = reverse_state + 1
         reverse_states[reverse_state] = T
-
-#for i in TY:
-#    print(i)
-#    print()
-#exit(0)
 
 X1 = [[-1 for _ in range(8)]]
 for i, X_i in enumerate(X_1):
