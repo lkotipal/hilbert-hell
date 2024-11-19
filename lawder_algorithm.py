@@ -48,7 +48,7 @@ Y = [
 ]
 '''
 
-''' "Butz", from Haverkort
+#''' "Butz", from Haverkort
 X_1 = [
     0b000,
     0b001,
@@ -75,13 +75,43 @@ X_2 = [
 handedness = np.array([False for _ in range(8)])
 reverse = np.array([False for _ in range(8)]) # TODO is Butz actually ambivalent on mirroring?
 
-# alfa
-handedness[[0, 3, 4]] = True # 'alfa' from Haverkort
+""" alfa
+handedness[[0, 3, 4]] = True
 X_2_reverse = X_2.copy()
 reverse[[2, 4, 6, 7]] = True
-'''
+"""
 
-#''' "Beta" , from Haverkort
+#''' Sasburg from Haverkort
+X_1 = [
+    0b000,
+    0b001,
+    0b011,
+    0b010,
+    0b110,
+    0b111,
+    0b101,
+    0b100
+]
+
+X_2 = [
+    (0b000, 0b001),
+    (0b000, 0b010),
+    (0b000, 0b100),
+    (0b101, 0b100),
+    (0b000, 0b001),
+    (0b000, 0b100),
+    (0b110, 0b100),
+    (0b101, 0b100)
+]
+
+handedness = np.array([False for _ in range(8)])
+reverse = np.array([False for _ in range(8)])
+handedness = np.array([True, False, True, False, False, True, False, True])
+X_2_reverse = X_2.copy()
+#'''
+
+
+''' "Beta" , from Haverkort
 X_1 = [
     0b000,
     0b001,
@@ -103,13 +133,20 @@ X_2 = [
     (0b011, 0b010),
     (0b011, 0b111),
 ]
-handedness = [False, True, True, False, False, True, True, True]
-reverse = [True, True, False, True, False, True, False, False]
+handedness = np.array([False, True, True, False, False, True, True, True])
+reverse = np.array([True, True, False, True, False, True, False, False])
 
 X_2_reverse = X_2.copy()
 X_2_reverse[0] = (0b011, 0b111)
 X_2_reverse[7] = (0b011, 0b001)
-#'''
+#handedness_reverse = np.flip(handedness.copy())
+# TODO what's the correct one?
+# If the reversal is in fact a rotation instead of a mirroring[::-1]
+# X_2 reverse is just X_2
+# But what the hell is it, really?
+#handedness_reverse = np.array([False, False, False, True, True, False, False, False])
+#reverse_reverse = np.array([])
+'''
 
 dY = list([i ^ j for i, j in X_2])
 TY = [np.stack((toVector(i), toVector(leftRotate(i, 1) if left else rightRotate(i, 1)), toVector(leftRotate(i, 2) if left else rightRotate(i, 2)))) for i, left in zip(dY, handedness)]
