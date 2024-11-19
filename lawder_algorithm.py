@@ -48,7 +48,7 @@ Y = [
 ]
 '''
 
-#''' "Butz", from Haverkort
+''' "Butz", from Haverkort
 X_1 = [
     0b000,
     0b001,
@@ -80,8 +80,9 @@ handedness[[0, 3, 4]] = True
 X_2_reverse = X_2.copy()
 reverse[[2, 4, 6, 7]] = True
 """
+'''
 
-#''' Sasburg from Haverkort
+''' Sasburg from Haverkort
 X_1 = [
     0b000,
     0b001,
@@ -108,10 +109,10 @@ handedness = np.array([False for _ in range(8)])
 reverse = np.array([False for _ in range(8)])
 handedness = np.array([True, False, True, False, False, True, False, True])
 X_2_reverse = X_2.copy()
-#'''
+'''
 
 
-''' "Beta" , from Haverkort
+#''' "Beta" , from Haverkort
 X_1 = [
     0b000,
     0b001,
@@ -146,7 +147,7 @@ X_2_reverse[7] = (0b011, 0b001)
 # But what the hell is it, really?
 #handedness_reverse = np.array([False, False, False, True, True, False, False, False])
 #reverse_reverse = np.array([])
-'''
+#'''
 
 dY = list([i ^ j for i, j in X_2])
 TY = [np.stack((toVector(i), toVector(leftRotate(i, 1) if left else rightRotate(i, 1)), toVector(leftRotate(i, 2) if left else rightRotate(i, 2)))) for i, left in zip(dY, handedness)]
@@ -232,31 +233,35 @@ for u, (X1u, tmu) in enumerate(zip(X1, tm)):
 contents = ''
 print('static unsigned const data3d [] = {')
 for i in X1:
+    contents += '  '
     for j in i:
-        contents += f'{j}, '
+        contents += f'{j:>1}, '
     contents += '\n'
 print(f'{contents[:-3]}\n}};\n')
 
 contents = ''
 print('static unsigned const state3d [] = {')
 for i in tm:
+    contents += '  '
     for j in i:
-        contents += f'{j}, '
+        contents += f'{j:>2}, '
     contents += '\n'
 print(f'{contents[:-3]}\n}};\n')
 
 contents = ''
 print('static unsigned const idata3d [] = {')
 for i in X1_inv:
+    contents += '  '
     for j in i:
-        contents += f'{j}, '
+        contents += f'{j:>1}, '
     contents += '\n'
 print(f'{contents[:-3]}\n}};\n')
 
 contents = ''
 print('static unsigned const istate3d [] = {')
 for i in tm_inv:
+    contents += '  '
     for j in i:
-        contents += f'{j}, '
+        contents += f'{j:>2}, '
     contents += '\n'
 print(f'{contents[:-3]}\n}};\n')
