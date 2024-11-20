@@ -175,7 +175,7 @@ def stateTables(X_1, X_2, X_2_reverse, handedness, reverse, **kwargs):
     TY_reverse = list(zip(TY_reverse, reverse[::-1]))
 
     reverse_state = 0
-    reverse_states = {0: (np.identity(3, int), False)}
+    reverse_states = {0: (np.identity(3, int), True)} # I think...
     for i, T in enumerate(TY_reverse):
         for j, mat in reverse_states.items():
             if (np.array_equal(T[0], mat[0]) and T[1] == mat[1]):
