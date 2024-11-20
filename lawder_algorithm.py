@@ -257,8 +257,9 @@ def main():
         contents = ''
         for name, table in tables.items():
             contents += tableToArray(name=name, data=table)
+            contents += '\n'
         with open(f'tables_{curve.name}.h', 'w') as f:
-            print(contents, file=f)
+            print(contents, end='', file=f)
 
 if __name__ == "__main__":
     main()
