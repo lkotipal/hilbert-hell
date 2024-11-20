@@ -1,4 +1,6 @@
+from dataclasses import asdict, dataclass
 import numpy as np
+import string
 
 def rotate(n, d):
     return leftRotate(n, d) if d > 0 else rightRotate(n, -d)
@@ -35,233 +37,228 @@ def rightMatmul(M, v):
                 ret[i] = not toVector(v)[j]
     return toBinary(ret)
 
-''' This table is just indexing 0 - 7
-Y = [
-    0b000,
-    0b001,
-    0b010,
-    0b011,
-    0b100,
-    0b101,
-    0b110,
-    0b111
-]
-'''
+# Base pattern for most curves here
+Ca00 = [0b000, 0b001, 0b011, 0b010, 0b110, 0b111, 0b101, 0b100]
 
-''' "Butz", from Haverkort
-X_1 = [
-    0b000,
-    0b001,
-    0b011,
-    0b010,
-    0b110,
-    0b111,
-    0b101,
-    0b100
-]
+@dataclass
+class HilbertCurve:
+    def __init__(self, name, X_1, X_2, Y = None, handedness = None, reverse = None, X_2_reverse = None):
+        self.name = name
+        self.Y = Y if Y else [i for i in range(8)] 
+        self.X_1 = X_1
+        self.X_2 = X_2
+        self.handedness = handedness if handedness else [False for _ in range(8)]
+        self.reverse = reverse if reverse else [False for _ in range(8)]
+        self.X_2_reverse = X_2_reverse if X_2_reverse else X_2.copy()
 
-X_2 = [
-    (0b000, 0b001),
-    (0b000, 0b010),
-    (0b000, 0b010),
-    (0b011, 0b111),
-    (0b011, 0b111),
-    (0b110, 0b100),
-    (0b110, 0b100),
-    (0b101, 0b100)
-]
+    name: string
+    Y: list[int]
+    X_1: list[int]
+    X_2: list[tuple]
+    handedness: list[bool]
+    reverse: list[bool]
+    X_2_reverse: list[tuple]
 
-# Butz
-handedness = np.array([False for _ in range(8)])
-reverse = np.array([False for _ in range(8)]) # TODO is Butz actually ambivalent on mirroring?
+Butz = HilbertCurve(
+    name = 'butz',
+    X_1 = Ca00,
+    X_2 = [
+        (0b000, 0b001),
+        (0b000, 0b010),
+        (0b000, 0b010),
+        (0b011, 0b111),
+        (0b011, 0b111),
+        (0b110, 0b100),
+        (0b110, 0b100),
+        (0b101, 0b100)
+    ]
+)
 
-""" alfa
-handedness[[0, 3, 4]] = True
-X_2_reverse = X_2.copy()
-reverse[[2, 4, 6, 7]] = True
-"""
-'''
+Alfa = HilbertCurve(
+    name = 'alfa',
+    X_1 = Ca00,
+    X_2 = Butz.X_2,
+    handedness = [True, False, False, True, True, False, False, False],
+    reverse = [False, False, True, False, True, False, True, True]
+)
 
-''' Sasburg from Haverkort
-X_1 = [
-    0b000,
-    0b001,
-    0b011,
-    0b010,
-    0b110,
-    0b111,
-    0b101,
-    0b100
-]
+Harmonious = HilbertCurve(
+    name = 'harmonious',
+    X_1 = Ca00,
+    X_2 = Butz.X_2,
+    handedness = [True, True, False, True, True, False, True, True]
+)
 
-X_2 = [
-    (0b000, 0b001),
-    (0b000, 0b010),
-    (0b000, 0b100),
-    (0b101, 0b100),
-    (0b000, 0b001),
-    (0b000, 0b100),
-    (0b110, 0b100),
-    (0b101, 0b100)
-]
+Basecamp = HilbertCurve(
+    name = 'base_camp',
+    X_1 = Ca00,
+    X_2 = [
+        (0b000, 0b001),
+        (0b010, 0b110),
+        (0b100, 0b000),
+        (0b001, 0b101),
+        (0b001, 0b101),
+        (0b100, 0b000),
+        (0b010, 0b110),
+        (0b111, 0b110)
+    ],
+    handedness = [True, True, False, True, True, False, True, False],
+    reverse= [False, True, False, True, False, True, False, True]
+)
 
-handedness = np.array([False for _ in range(8)])
-reverse = np.array([False for _ in range(8)])
-handedness = np.array([True, False, True, False, False, True, False, True])
-X_2_reverse = X_2.copy()
-'''
+Sasburg = HilbertCurve(
+    name = 'sasburg',
+    X_1 = Ca00,
+    X_2 = [
+        (0b000, 0b001),
+        (0b000, 0b010),
+        (0b000, 0b100),
+        (0b101, 0b100),
+        (0b000, 0b001),
+        (0b000, 0b100),
+        (0b110, 0b100),
+        (0b101, 0b100)
+    ],
+    handedness = [True, False, True, False, False, True, False, True]
+)
 
+Beta = HilbertCurve(
+    name='beta',
+    X_1 = Ca00,
+    X_2 = [
+        (0b101, 0b111),
+        (0b110, 0b111),
+        (0b101, 0b100),
+        (0b101, 0b100),
+        (0b000, 0b001),
+        (0b000, 0b001),
+        (0b011, 0b010),
+        (0b011, 0b111),
+    ],
+    handedness = [False, True, True, False, False, True, True, True],
+    reverse = [True, True, False, True, False, True, False, False]
+)
 
-#''' "Beta" , from Haverkort
-X_1 = [
-    0b000,
-    0b001,
-    0b011,
-    0b010,
-    0b110,
-    0b111,
-    0b101,
-    0b100
-]
+Beta.X_2_reverse[0] = (0b011, 0b111)
+Beta.X_2_reverse[7] = (0b011, 0b001)
 
-X_2 = [
-    (0b101, 0b111),
-    (0b110, 0b111),
-    (0b101, 0b100),
-    (0b101, 0b100),
-    (0b000, 0b001),
-    (0b000, 0b001),
-    (0b011, 0b010),
-    (0b011, 0b111),
-]
-handedness = np.array([False, True, True, False, False, True, True, True])
-reverse = np.array([True, True, False, True, False, True, False, False])
+# Beta musings
+    #handedness_reverse = np.flip(handedness.copy())
+    # TODO what's the correct one?
+    # If the reversal is in fact a rotation instead of a mirroring[::-1]
+    # X_2 reverse is just X_2
+    # But what the hell is it, really?
+    #handedness_reverse = np.array([False, False, False, True, True, False, False, False])
+    #reverse_reverse = np.array([])
 
-X_2_reverse = X_2.copy()
-X_2_reverse[0] = (0b011, 0b111)
-X_2_reverse[7] = (0b011, 0b001)
-#handedness_reverse = np.flip(handedness.copy())
-# TODO what's the correct one?
-# If the reversal is in fact a rotation instead of a mirroring[::-1]
-# X_2 reverse is just X_2
-# But what the hell is it, really?
-#handedness_reverse = np.array([False, False, False, True, True, False, False, False])
-#reverse_reverse = np.array([])
-#'''
+def stateTables(X_1, X_2, X_2_reverse, handedness, reverse, **kwargs):
+    dY = list([i ^ j for i, j in X_2])
+    TY = [np.stack((toVector(i), toVector(leftRotate(i, 1) if left else rightRotate(i, 1)), toVector(leftRotate(i, 2) if left else rightRotate(i, 2)))) for i, left in zip(dY, handedness)]
 
-dY = list([i ^ j for i, j in X_2])
-TY = [np.stack((toVector(i), toVector(leftRotate(i, 1) if left else rightRotate(i, 1)), toVector(leftRotate(i, 2) if left else rightRotate(i, 2)))) for i, left in zip(dY, handedness)]
-
-for i in range(8):
-    t = np.zeros((3, 3), int)
-    for j in range(3):
-        t[j, j] = -1 if X_2[i][0] & (4 >> j) else 1
-    TY[i] = np.dot(TY[i], t)
-
-TY = list(zip(TY, reverse))
-
-dY_reverse = list([i ^ j for i, j in X_2_reverse])
-TY_reverse = [np.stack((toVector(i), toVector(leftRotate(i, 1) if left else rightRotate(i, 1)), toVector(leftRotate(i, 2) if left else rightRotate(i, 2)))) for i, left in zip(dY_reverse, handedness[::-1])]
-
-for i in range(8):
-    t = np.zeros((3, 3), int)
-    for j in range(3):
-        t[j, j] = -1 if X_2[i][0] & (4 >> j) else 1
-    TY_reverse[i] = np.dot(TY_reverse[i], t)
-
-TY_reverse = list(zip(TY_reverse, reverse[::-1]))
-
-reverse_state = 0
-reverse_states = {0: np.identity(3, int)}
-for i, T in enumerate(TY_reverse):
-    for j, mat in reverse_states.items():
-        if (np.array_equal(T[0], mat[0]) and T[1] == mat[1]):
-            break
-    else:
-        reverse_state = reverse_state + 1
-        reverse_states[reverse_state] = T
-
-X1 = [[-1 for _ in range(8)]]
-for i, X_i in enumerate(X_1):
-    X1[0][i] = X_i
-
-
-state = 0
-states = {0: np.identity(3, int)}
-tm = [[-1 for _ in range(8)]]
-for i, T in enumerate(TY):
-    for j, mat in states.items():
-        if (np.array_equal(T[0], mat[0]) and T[1] == mat[1]):
-            tm[0][i] = j
-            break
-    else:
-        state = state + 1
-        states[state] = T
-        tm[0][i] = state
-
-u = 1
-while u <= state:
-    X1.append([-1 for _ in range(8)])
-    tm.append([-1 for _ in range(8)])
-    TMu, reverse_u = states[u]
     for i in range(8):
-        j = rightMatmul(TMu, i)
-        p = X1[0].index(j)
-        X1[u][p] = i
-        TMq, reverse_q = reverse_states[tm[0][p]] if reverse_u else states[tm[0][p]]
-        TMw = np.dot(TMq, TMu)
-        reverse_w = reverse_u ^ reverse_q
-        for idx, mat in states.items():
-            if (np.array_equal(TMw, mat[0]) and reverse_w == mat[1]):
-                tm[u][p] = idx
+        t = np.zeros((3, 3), int)
+        for j in range(3):
+            t[j, j] = -1 if X_2[i][0] & (4 >> j) else 1
+        TY[i] = np.dot(TY[i], t)
+
+    TY = list(zip(TY, reverse))
+
+    dY_reverse = list([i ^ j for i, j in X_2_reverse])
+    TY_reverse = [np.stack((toVector(i), toVector(leftRotate(i, 1) if left else rightRotate(i, 1)), toVector(leftRotate(i, 2) if left else rightRotate(i, 2)))) for i, left in zip(dY_reverse, handedness[::-1])]
+
+    for i in range(8):
+        t = np.zeros((3, 3), int)
+        for j in range(3):
+            t[j, j] = -1 if X_2[i][0] & (4 >> j) else 1
+        TY_reverse[i] = np.dot(TY_reverse[i], t)
+
+    TY_reverse = list(zip(TY_reverse, reverse[::-1]))
+
+    reverse_state = 0
+    reverse_states = {0: (np.identity(3, int), False)}
+    for i, T in enumerate(TY_reverse):
+        for j, mat in reverse_states.items():
+            if (np.array_equal(T[0], mat[0]) and T[1] == mat[1]):
+                break
+        else:
+            reverse_state = reverse_state + 1
+            reverse_states[reverse_state] = T
+
+    X1 = [[-1 for _ in range(8)]]
+    for i, X_i in enumerate(X_1):
+        X1[0][i] = X_i
+
+
+    state = 0
+    states = {0: (np.identity(3, int), False)}
+    tm = [[-1 for _ in range(8)]]
+    for i, T in enumerate(TY):
+        for j, mat in states.items():
+            if (np.array_equal(T[0], mat[0]) and T[1] == mat[1]):
+                tm[0][i] = j
                 break
         else:
             state = state + 1
-            states[state] = (TMw, reverse_w)
-            tm[u][p] = state
-    u = u + 1
+            states[state] = T
+            tm[0][i] = state
 
-X1_inv = []
-tm_inv = []
-for u, (X1u, tmu) in enumerate(zip(X1, tm)):
-    X1_inv.append([-1 for _ in range(8)])
-    tm_inv.append([-1 for _ in range(8)])
-    for idx, (x1, state) in enumerate(zip(X1u, tmu)):
-        X1_inv[u][x1] = idx
-        tm_inv[u][x1] = state
+    u = 1
+    while u <= state:
+        X1.append([-1 for _ in range(8)])
+        tm.append([-1 for _ in range(8)])
+        TMu, reverse_u = states[u]
+        for i in range(8):
+            j = rightMatmul(TMu, i)
+            p = X1[0].index(j)
+            X1[u][p] = i
+            TMq, reverse_q = reverse_states[tm[0][p]] if reverse_u else states[tm[0][p]]
+            TMw = np.dot(TMq, TMu)
+            reverse_w = reverse_u ^ reverse_q
+            for idx, mat in states.items():
+                if (np.array_equal(TMw, mat[0]) and reverse_w == mat[1]):
+                    tm[u][p] = idx
+                    break
+            else:
+                state = state + 1
+                states[state] = (TMw, reverse_w)
+                tm[u][p] = state
+        u = u + 1
 
-contents = ''
-print('static unsigned const data3d [] = {')
-for i in X1:
-    contents += '  '
-    for j in i:
-        contents += f'{j:>1}, '
-    contents += '\n'
-print(f'{contents[:-3]}\n}};\n')
+    X1_inv = []
+    tm_inv = []
+    for u, (X1u, tmu) in enumerate(zip(X1, tm)):
+        X1_inv.append([-1 for _ in range(8)])
+        tm_inv.append([-1 for _ in range(8)])
+        for idx, (x1, state) in enumerate(zip(X1u, tmu)):
+            X1_inv[u][x1] = idx
+            tm_inv[u][x1] = state
 
-contents = ''
-print('static unsigned const state3d [] = {')
-for i in tm:
-    contents += '  '
-    for j in i:
-        contents += f'{j:>2}, '
-    contents += '\n'
-print(f'{contents[:-3]}\n}};\n')
+    return {
+        'data3d':   X1, 
+        'state3d':  tm, 
+        'idata3d':  X1_inv, 
+        'istate3d': tm_inv
+    }
 
-contents = ''
-print('static unsigned const idata3d [] = {')
-for i in X1_inv:
-    contents += '  '
-    for j in i:
-        contents += f'{j:>1}, '
-    contents += '\n'
-print(f'{contents[:-3]}\n}};\n')
+def tableToArray(name, data):
+    contents = f'static unsigned const {name} [] = {{\n'
+    for i in data:
+        contents += '  '
+        for j in i:
+            contents += f'{j:>1}, '
+        contents += '\n'
+    contents = f'{contents[:-3]}\n}};\n'
+    return contents
 
-contents = ''
-print('static unsigned const istate3d [] = {')
-for i in tm_inv:
-    contents += '  '
-    for j in i:
-        contents += f'{j:>2}, '
-    contents += '\n'
-print(f'{contents[:-3]}\n}};\n')
+def main():
+    for curve in (Butz, Alfa, Harmonious, Sasburg, Basecamp, Beta):
+        print(curve.name)
+        tables = stateTables(**asdict(curve))
+        contents = ''
+        for name, table in tables.items():
+            contents += tableToArray(name=name, data=table)
+        with open(f'tables_{curve.name}.h', 'w') as f:
+            print(contents, file=f)
+
+if __name__ == "__main__":
+    main()
