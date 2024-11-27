@@ -240,14 +240,14 @@ def stateTables(X_1, X_2, X_2_reverse, handedness, reverse, **kwargs):
         'istate3d': tm_inv
     }
 
-def tableToArray(name, data):
-    contents = f'static unsigned const {name} [] = {{\n'
+def tableToArray(name, data, wid):
+    contents = f'static unsigned const int {name} [] = {{\n'
     for i in data:
         contents += '  '
         for j in i:
-            contents += f'{j:>1}, '
-        contents += '\n'
-    contents = f'{contents[:-3]}\n}};\n'
+            contents += f'{j:>{wid}}, '
+        contents = f'{contents[:-1]}\n'
+    contents = f'{contents[:-2]}\n}};\n'
     return contents
 
 def main():
@@ -256,7 +256,7 @@ def main():
         tables = stateTables(**asdict(curve))
         contents = ''
         for name, table in tables.items():
-            contents += tableToArray(name=name, data=table)
+            contents += tableToArray(name=f'{curve.name}_{name}', data=table, wid=2 if 'state' in name else 1)
             contents += '\n'
         with open(f'tables_{curve.name}.h', 'w') as f:
             print(contents, end='', file=f)
