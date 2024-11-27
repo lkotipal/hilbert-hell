@@ -169,7 +169,7 @@ def stateTables(X_1, X_2, X_2_reverse, handedness, reverse, **kwargs):
     for i in range(8):
         t = np.zeros((3, 3), int)
         for j in range(3):
-            t[j, j] = -1 if X_2[i][0] & (4 >> j) else 1
+            t[j, j] = -1 if X_2_reverse[i][0] & (4 >> j) else 1
         TY_reverse[i] = np.dot(TY_reverse[i], t)
 
     TY_reverse = list(zip(TY_reverse, reverse[::-1]))
